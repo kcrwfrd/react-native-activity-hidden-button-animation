@@ -96,7 +96,7 @@ a constructor annotation and `nonisolated(unsafe)` locals that only newer
 toolchains accept. Xcode 26.4 and later are supported upstream. See
 [expo/expo#50067](https://github.com/expo/expo/issues/50067).
 
-This project carries a patch for it in `patches/expo-modules-jsi+57.1.1.patch`.
+This project carries a patch for it in `patches/expo-modules-jsi+58.0.7.patch`.
 It is **not** applied automatically. If you are on Xcode 26.3 and the iOS
 build fails, apply it once after installing dependencies:
 
