@@ -4,6 +4,8 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## The bug this project reproduces
 
+https://github.com/user-attachments/assets/5b5bd6b5-1e00-4085-aba4-0cffe72c6bfe
+
 A `TouchableOpacity` that hides itself (and its siblings) through React's
 `<Activity mode="hidden">` comes back **partially transparent** when the
 Activity is shown again, and stays that way until it is pressed again. The
