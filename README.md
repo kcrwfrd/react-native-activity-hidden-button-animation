@@ -25,6 +25,32 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Xcode 26.3 patch (optional)
+
+The iOS build fails on Xcode 26.3 (Swift 6.2) because `expo-modules-jsi` uses
+a constructor annotation and `nonisolated(unsafe)` locals that only newer
+toolchains accept. Xcode 26.4 and later are supported upstream. See
+[expo/expo#50067](https://github.com/expo/expo/issues/50067).
+
+This project carries a patch for it in `patches/expo-modules-jsi+57.1.1.patch`.
+It is **not** applied automatically. If you are on Xcode 26.3 and the iOS
+build fails, apply it once after installing dependencies:
+
+```bash
+npm run patch:xcode26
+```
+
+This runs [patch-package](https://github.com/ds300/patch-package) against
+`node_modules`. Re-run it after anything that recreates `node_modules`, such
+as `npm ci` or reinstalling `expo-modules-jsi`. The patch is harmless on
+toolchains that do not need it.
+
+To remove the patch without reinstalling:
+
+```bash
+npx patch-package --reverse
+```
+
 ## Get a fresh project
 
 When you're ready, run:
