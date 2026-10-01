@@ -74,6 +74,11 @@ re-render the view with the stale JS value. Both are needed.
    npm install
    ```
 
+   `.npmrc` sets `legacy-peer-deps=true` because SDK 58 ships React Native
+   0.88.0-rc.3 and `react-native-reanimated` declares a peer range of
+   `0.86 - 0.88`, which npm does not match against a prerelease. Remove the
+   setting once SDK 58 is stable on a non-RC React Native.
+
 2. Start the app
 
    ```bash
