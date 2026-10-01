@@ -1,6 +1,68 @@
-# Welcome to your Expo app 👋
+# `react-native-activity-hidden-button-animation`
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
+## The bug this project reproduces
+
+A `TouchableOpacity` that hides itself (and its siblings) through React's
+`<Activity mode="hidden">` comes back **partially transparent** when the
+Activity is shown again, and stays that way until it is pressed again. The
+reproduction lives in `src/components/activity-button.tsx` and is the home
+screen of the app.
+
+### Environment
+
+| | |
+|---|---|
+| Expo SDK | 57 (`expo ~57.0.26`) |
+| React Native | 0.86.3, New Architecture (Fabric) |
+| React | 19.2.3 |
+| Platform | iOS, iPhone 17 Pro simulator, iOS 26.3 |
+
+Android was not tested.
+
+### Steps
+
+1. Tap the top button. Its `onPress` sets the Activity to `hidden`, so both
+   buttons disappear.
+2. Tap **Show again**.
+
+Expected: both buttons return at full opacity.
+Actual: the tapped button returns at `activeOpacity` (0.2). The untouched
+control button is fine. Pressing the faded button once restores it.
+
+### What is going on
+
+Two independent faults stack up. Each was isolated by patching
+`node_modules/react-native` and measuring the button colour in simulator
+screenshots. #2563eb at 0.2 opacity over white is exactly rgb(211, 224, 251),
+which is what every failing run produced.
+
+**1. A stale native animation callback overwrites the reset (JavaScript).**
+Hiding an Activity calls `componentWillUnmount` on class components, so
+`TouchableOpacity` runs `this.state.anim.resetAnimation()` and sets the JS
+value back to 1. Stopping a native-driver animation makes iOS report the
+animation's current value back to JS asynchronously, and `Animation.js`
+applies that value unconditionally. A few milliseconds after the reset, JS
+believes the opacity is 0.2 again. A patch that ignores the reported end value
+after a JS-initiated `setValue`/`resetAnimation` keeps the JS value at 1.
+Relevant files: `Libraries/Animated/animations/Animation.js`,
+`Libraries/Animated/nodes/AnimatedValue.js`.
+
+**2. iOS Fabric drops animated updates while the view is hidden (native).**
+Fabric does not mount `display: none` views at all, which is how React hides
+an Activity on React Native. The opacity update that the reset pushes to the
+native view therefore has no view to land on and is silently discarded in
+`RCTSurfacePresenter`. When the Activity is shown again the re-mounted view
+keeps whatever its layer last had, which is the pressed-in 0.2. Pushing a
+distinctive value such as 0.5 while hidden confirmed this: it never showed up.
+Timing matters for any re-sync after reveal: a push from `componentDidMount`
+or a `requestAnimationFrame` scheduled inside the reveal commit still arrives
+before the native re-mount and is lost. A push issued 50 ms or later after the
+reveal reaches the view.
+
+Fixing only fault 1 leaves the view stuck at 0.2. Fixing only fault 2 would
+re-render the view with the stale JS value. Both are needed.
 
 ## Get started
 
