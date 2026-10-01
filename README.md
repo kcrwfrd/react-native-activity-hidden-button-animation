@@ -74,6 +74,11 @@ re-render the view with the stale JS value. Both are needed.
    npm install
    ```
 
+   `.npmrc` sets `legacy-peer-deps=true` because SDK 58 ships React Native
+   0.88.0-rc.3 and `react-native-reanimated` declares a peer range of
+   `0.86 - 0.88`, which npm does not match against a prerelease. Remove the
+   setting once SDK 58 is stable on a non-RC React Native.
+
 2. Start the app
 
    ```bash
@@ -96,7 +101,7 @@ a constructor annotation and `nonisolated(unsafe)` locals that only newer
 toolchains accept. Xcode 26.4 and later are supported upstream. See
 [expo/expo#50067](https://github.com/expo/expo/issues/50067).
 
-This project carries a patch for it in `patches/expo-modules-jsi+57.1.1.patch`.
+This project carries a patch for it in `patches/expo-modules-jsi+58.0.7.patch`.
 It is **not** applied automatically. If you are on Xcode 26.3 and the iOS
 build fails, apply it once after installing dependencies:
 
